@@ -123,7 +123,6 @@ function getLearnerData(courseinfo, ag, submissions) {
     // filtered using Learner_id from learners submittions and created new array
     let filteredSubmissions = submissions.filter(a => a.learner_id == '125')
     //using for in to loop through filteredSubmssions array
-
     for (item in filteredSubmissions) {
         let obj = filteredSubmissions[item]
         let score = obj.submission.score;
@@ -132,13 +131,21 @@ function getLearnerData(courseinfo, ag, submissions) {
         scoresArr.push(score)
         let assignmentid = obj.assignment_id;
         let assignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
-// looping through
 
-        for (i=0;i<assignmentGroup.length ;i++){
-            let obj2=ag.assignments[i]
-            let pointspossible=obj2.points_possible;
-            pointspossArr.push(pointspossible)
-            
+        // looping through assignment group array
+
+        for (i = 0; i < assignmentGroup.length; i++) {
+            let obj2 = assignmentGroup[i]
+            let pointspossible = obj2.points_possible;
+            let dueat = obj2.due_at;
+            let today = new Date();
+            if (today.toISOString().split('t')[0] >= dueat) {
+                 // pushed all the points possible in points possible array.
+                 pointspossArr.push(pointspossible)
+                
+
+            }
+
         }
     }
     console.log(pointspossArr)

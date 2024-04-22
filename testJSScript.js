@@ -179,9 +179,10 @@ function getLearnerData(course, ag, submissions) {
     // let retObjArr = [];
     for (i = 0; i < assignmentidsArr.length; i++) {
         let ob = assignmentidsArr[i];
+        const keys = Object.keys(ob);
         let retObj = {};
-        resultObj.ide = ob.id;
-        resultObj.value = ob.weighteavgscore;
+        let obval = ob.value;
+        resultObj[key] = keys[0];
         // retObjArr.push(retObj);
     }
 
