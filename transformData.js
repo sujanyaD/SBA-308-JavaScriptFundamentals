@@ -131,13 +131,17 @@ function getLearnerData(courseinfo, ag, submissions) {
         //pushed all the scores in scoresarray
         scoresArr.push(score)
         let assignmentid = obj.assignment_id;
+        let assignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
+// looping through
 
-// filtering  assignment group array for points_possible 
-
-        let filterAssignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
-        // the learner scored on the assignment (submission.score / points_possible)
-        console.log(filterAssignmentGroup)
+        for (i=0;i<assignmentGroup.length ;i++){
+            let obj2=ag.assignments[i]
+            let pointspossible=obj2.points_possible;
+            pointspossArr.push(pointspossible)
+            
+        }
     }
+    console.log(pointspossArr)
 
 
     let sumOfscores = sumOfArray(scoresArr)
