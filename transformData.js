@@ -115,77 +115,54 @@ const LearnerSubmissions = [
 //     // the average or the keyed dictionary of scores
 // } 
 
-function getLearnerData(course, ag, submissions) {
-    let result = [];
-
-    let filteredSubmissions = submissions.filter((a) => { if (a.learner_id == 125) { return a } });
+//
+function getLearnerData(courseinfo, ag, submissions) {
     let pointspossArr = [];
     let scoresArr = [];
     let assignmentidsArr = [];
-    for (itm in filteredSubmissions) {
-        let obj = filteredSubmissions[itm];
+    // filtered using Learner_id from learners submittions and created new array
+    let filteredSubmissions = submissions.filter(a => a.learner_id == '125')
+    //using for in to loop through filteredSubmssions array
+
+    for (item in filteredSubmissions) {
+        let obj = filteredSubmissions[item]
         let score = obj.submission.score;
+
+        //pushed all the scores in scoresarray
+        scoresArr.push(score)
         let assignmentid = obj.assignment_id;
-        let submittedat = obj.submission.submitted_at;
 
-        let filteredag = ag.assignments.filter((a) => { if (a.id == assignmentid) { return a } });
-        for (itm in filteredag) {
-            let objAg = filteredag[itm];
-            let dueat = objAg.due_at;
-            let pointspossible = objAg.points_possible;
-            let today = new Date();
+// filtering  assignment group array for points_possible 
 
-            if (today.toISOString().split('T')[0] >= dueat) {
-
-                pointspossArr.push(pointspossible);
-                scoresArr.push(score);
-                let newObj = {}
-                newObj.id = assignmentid;
-                let weighteavgscore = 0.0;
-                if (submittedat > dueat) {
-                    pointspossiblededuction = (pointspossible * 10) / 100;
-                    weighteavgscore = (score - pointspossiblededuction) / pointspossible;
-                }
-                else{
-                    weighteavgscore = score / pointspossible;
-                }
-                newObj.value = weighteavgscore;
-
-                assignmentidsArr.push(
-                    newObj
-                );
-            }
-
-        }
-
-    }
-    const sumpointspossArr = pointspossArr.reduce((a, b) => a + b, 0);
-    const scoresArrsum = scoresArr.reduce((a, b) => a + b, 0);
-
-    let avg = scoresArrsum / sumpointspossArr
-    console.log(pointspossArr);
-    console.log(scoresArr);
-
-    console.log()
-    console.log(avg);
-    console.log(assignmentidsArr);
-    console.log(assignmentidsArr[0].id);
-
-    // const object3 = {...object1, ...object2 }
-    let resultObj = {};
-    resultObj.id = 125 //learner_id
-    resultObj.avg = avg
-
-    // let retObjArr = [];
-    for (i = 0; i < assignmentidsArr.length; i++) {
-        let ob = assignmentidsArr[i];
-        let retObj = {};
-        resultObj.ide = ob.id;
-        resultObj.value = ob.weighteavgscore;
-        // retObjArr.push(retObj);
+        let filterAssignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
+        // the learner scored on the assignment (submission.score / points_possible)
+        console.log(filterAssignmentGroup)
     }
 
-    return resultObj;
 
+    let sumOfscores = sumOfArray(scoresArr)
+    console.log(`scores Array:${scoresArr}`)
+    console.log(`Sum of all the scores:${sumOfscores}`)
+    return filteredSubmissions;
 }
-console.log(getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions));
+function sumOfArray(arr) {
+    // initalize sum S
+    let s = 0;
+    // iterating through alla elements
+    for (let i = 0; i < arr.length; i++) {
+        // adding them to sum
+        s = s + arr[i];
+    }
+    return s;
+}
+console.log(getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions))
+
+
+
+
+
+
+
+
+
+
