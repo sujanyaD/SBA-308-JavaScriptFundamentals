@@ -126,11 +126,13 @@ function getLearnerData(courseinfo, ag, submissions) {
         let result = [];
         // getting distinct learner id from all the exixting ids
         const distinctlearnerids = [...new Set(submissions.map(itm => itm.learner_id))];
+        // iterating trough learner-id,s.
+        for (let k = 0; k < distinctlearnerids.length; k++) {
         let pointspossArr = [];
         let scoresArr = [];
         let assignmentidsArr = [];
         // filtered using Learner_id from learners submittions and created new array
-        let filteredSubmissions = submissions.filter(a => a.learner_id == '125')
+        let filteredSubmissions = submissions.filter(a => a.learner_id == distinctlearnerids[k])
         //using for in to loop through filteredSubmssions array
         for (item in filteredSubmissions) {
             let obj = filteredSubmissions[item]
@@ -196,14 +198,15 @@ function getLearnerData(courseinfo, ag, submissions) {
         console.log(`Average for Learner-id-125: ${avg}`)
         // creating an empty object for entire object.
         let resultobj = {};
-        resultobj.id = distinctlearnerids[i];// learner_id
+        resultobj.id = distinctlearnerids[k];// learner_id
         resultobj.avg = avg;
         for (j = 0; j < assignmentidsArr.length; j++) {
             let obj3 = assignmentidsArr[j];
             let id = obj3.id;
             resultobj[id] = obj3.value;
         }
-        result.push(resultObj);
+        result.push(resultobj);
+    }
         return result; // returning entire output in result array
     }
     catch (err) {
