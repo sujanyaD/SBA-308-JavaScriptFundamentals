@@ -117,44 +117,99 @@ const LearnerSubmissions = [
 
 //
 function getLearnerData(courseinfo, ag, submissions) {
-    let pointspossArr = [];
-    let scoresArr = [];
-    let assignmentidsArr = [];
-    // filtered using Learner_id from learners submittions and created new array
-    let filteredSubmissions = submissions.filter(a => a.learner_id == '125')
-    //using for in to loop through filteredSubmssions array
-    for (item in filteredSubmissions) {
-        let obj = filteredSubmissions[item]
-        let score = obj.submission.score;
+    //checking if course id is valid not not using if condition with notequal operator and in try catch block.
+    if (ag.course_id != courseinfo.id) {
+        throw "input was Invalid";
+        return;
+    }
+    try {
+        let result = [];
+        // getting distinct learner id from all the exixting ids
+        const distinctlearnerids = [...new Set(submissions.map(itm => itm.learner_id))];
+        let pointspossArr = [];
+        let scoresArr = [];
+        let assignmentidsArr = [];
+        // filtered using Learner_id from learners submittions and created new array
+        let filteredSubmissions = submissions.filter(a => a.learner_id == '125')
+        //using for in to loop through filteredSubmssions array
+        for (item in filteredSubmissions) {
+            let obj = filteredSubmissions[item]
+            let score = obj.submission.score;
+            //creating a new variable for storing assignment ID
+            let assignmentid = obj.assignment_id;
+            //creating a new variable to store submited_at from submission object.
+            let submittedAt = obj.submission.submitted_at;
 
-        //pushed all the scores in scoresarray
-        scoresArr.push(score)
-        let assignmentid = obj.assignment_id;
-        let assignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
+            // filterning points possible by assignmentid 
+            let assignmentGroup = ag.assignments.filter(a => a.id == assignmentid)
+            // looping through assignment group array
+            for (i = 0; i < assignmentGroup.length; i++) {
+                //getting object from array elements
+                let obj2 = assignmentGroup[i]
+                let pointspossible = obj2.points_possible;
 
-        // looping through assignment group array
+                let dueat = obj2.due_at;
+                let today = new Date();
+                //checking due date with current date /todays date
+                //using split thod formatted date .
+                if (today.toISOString().split('T')[0] >= dueat) {
+                    // pushed all the points possible in points possible array.
+                    pointspossArr.push(pointspossible)
+                    // created an empty object.
+                    let newobj2 = {}
+                    newobj2.id = assignmentid;
+                    let weightedavgscore = 0;
+                    // check if submitted at due date , for late submission deduct 10%.and caluculating deduction.
+                    if (submittedAt > dueat) {
+                        let pointspossibleDeduction = (pointspossible * 10) / 100;
+                        //1: 0.94, // 47 / 50
+                        weightedavgscore = (score - pointspossibleDeduction) / pointspossible;
+                        scoresArr.push(score - pointspossibleDeduction);
+                    }
+                    else {
+                        weightedavgscore = score / pointspossible;
+                        //pushed all the scores in scoresarray
+                        scoresArr.push(score)
+                    }
+                    //pushing weigted averarage scode along with id into newob2
+                    newobj2.value = weightedavgscore;
+                    //pushed into new array.
+                    assignmentidsArr.push(newobj2);
 
-        for (i = 0; i < assignmentGroup.length; i++) {
-            let obj2 = assignmentGroup[i]
-            let pointspossible = obj2.points_possible;
-            let dueat = obj2.due_at;
-            let today = new Date();
-            if (today.toISOString().split('t')[0] >= dueat) {
-                 // pushed all the points possible in points possible array.
-                 pointspossArr.push(pointspossible)
-                
-
+                }
             }
 
         }
+
+        //const sumOfPointspossArr = pointspossArr.reduce((a, b) => a + b, 0);
+        // const scoresArrsum = scoresArr.reduce((a, b) => a + b, 0);
+        //caluclating for sum of scores 
+        let sumOfscores = sumOfArray(scoresArr)
+        console.log(`scores Array:${scoresArr}`)
+        console.log(`Sum of all the scores:${sumOfscores}`)
+        // caluculating sum for posints possible
+        let sumOfPointsPossible = sumOfArray(pointspossArr)
+        console.log(`points possible array:${pointspossArr}`)
+        console.log(`sum of all POints Possible:${sumOfPointsPossible}`)
+        // caluculating average 
+        let avg = sumOfscores / sumOfPointsPossible
+        console.log(`Average for Learner-id-125: ${avg}`)
+        // creating an empty object for entire object.
+        let resultobj = {};
+        resultobj.id = distinctlearnerids[i];// learner_id
+        resultobj.avg = avg;
+        for (j = 0; j < assignmentidsArr.length; j++) {
+            let obj3 = assignmentidsArr[j];
+            let id = obj3.id;
+            resultobj[id] = obj3.value;
+        }
+        result.push(resultObj);
+        return result; // returning entire output in result array
     }
-    console.log(pointspossArr)
+    catch (err) {
+        return err.name;
+    }
 
-
-    let sumOfscores = sumOfArray(scoresArr)
-    console.log(`scores Array:${scoresArr}`)
-    console.log(`Sum of all the scores:${sumOfscores}`)
-    return filteredSubmissions;
 }
 function sumOfArray(arr) {
     // initalize sum S

@@ -116,77 +116,78 @@ const LearnerSubmissions = [
 // } 
 
 function getLearnerData(course, ag, submissions) {
-    let result = [];
 
-    let filteredSubmissions = submissions.filter((a) => { if (a.learner_id == 125) { return a } });
-    let pointspossArr = [];
-    let scoresArr = [];
-    let assignmentidsArr = [];
-    for (itm in filteredSubmissions) {
-        let obj = filteredSubmissions[itm];
-        let score = obj.submission.score;
-        let assignmentid = obj.assignment_id;
-        let submittedat = obj.submission.submitted_at;
+    if (ag.course_id != course.id) {
+        throw "input was Invalid";
+        return;
+    }
+    try {
+        let result = [];
+        const distinctlearnerids = [...new Set(submissions.map(itm => itm.learner_id))];
+        for (let k = 0; k < distinctlearnerids.length; k++) {
+            let filteredSubmissions = submissions.filter(a => a.learner_id == distinctlearnerids[k]);
+            let pointspossArr = [];
+            let scoresArr = [];
+            let assignmentidsArr = [];
+            let pointspossiblededuction = 0;
 
-        let filteredag = ag.assignments.filter((a) => { if (a.id == assignmentid) { return a } });
-        for (itm in filteredag) {
-            let objAg = filteredag[itm];
-            let dueat = objAg.due_at;
-            let pointspossible = objAg.points_possible;
-            let today = new Date();
+            for (itm in filteredSubmissions) {
+                let obj = filteredSubmissions[itm];
+                let score = obj.submission.score;
+                let assignmentid = obj.assignment_id;
+                let submittedat = obj.submission.submitted_at;
 
-            if (today.toISOString().split('T')[0] >= dueat) {
+                let filteredag = ag.assignments.filter((a) => { if (a.id == assignmentid) { return a } });
+                for (itm in filteredag) {
+                    let objAg = filteredag[itm];
+                    let dueat = objAg.due_at;
+                    let pointspossible = objAg.points_possible;
+                    if(pointspossible === 0)
+                        return "Points possible cannot be 0";
+                    let today = new Date();
+                    //
+                    if (today.toISOString().split('T')[0] >= dueat) {
 
-                pointspossArr.push(pointspossible);
-                scoresArr.push(score);
-                let newObj = {}
-                newObj.id = assignmentid;
-                let weighteavgscore = 0.0;
-                if (submittedat > dueat) {
-                    pointspossiblededuction = (pointspossible * 10) / 100;
-                    weighteavgscore = (score - pointspossiblededuction) / pointspossible;
+                        pointspossArr.push(pointspossible);
+                        let newObj = {}
+                        newObj.id = assignmentid;
+
+                        let weighteavgscore = 0;
+                        if (submittedat > dueat) {
+                            pointspossiblededuction = (pointspossible * 10) / 100;
+                            weighteavgscore = (score - pointspossiblededuction) / pointspossible;
+                            scoresArr.push(score - pointspossiblededuction);
+                        }
+                        else {
+                            weighteavgscore = score / pointspossible;
+                            scoresArr.push(score);
+                        }
+                        newObj.value = parseFloat(weighteavgscore.toFixed(3));
+                        assignmentidsArr.push(newObj);
+                    }
+
                 }
-                else{
-                    weighteavgscore = score / pointspossible;
-                }
-                newObj.value = weighteavgscore;
 
-                assignmentidsArr.push(
-                    newObj
-                );
             }
+            const sumpointspossArr = pointspossArr.reduce((a, b) => a + b, 0);
+            const scoresArrsum = scoresArr.reduce((a, b) => a + b, 0);
 
+            let avg = scoresArrsum / sumpointspossArr
+            let resultObj = {};
+            resultObj.id = distinctlearnerids[k]; //learner_id
+            resultObj.avg = avg
+            for (i = 0; i < assignmentidsArr.length; i++) {
+                let ob = assignmentidsArr[i];
+                let id = ob.id;
+                resultObj[id] = ob.value;
+            }
+            result.push(resultObj);
         }
-
+        return result;
     }
-    const sumpointspossArr = pointspossArr.reduce((a, b) => a + b, 0);
-    const scoresArrsum = scoresArr.reduce((a, b) => a + b, 0);
-
-    let avg = scoresArrsum / sumpointspossArr
-    console.log(pointspossArr);
-    console.log(scoresArr);
-
-    console.log()
-    console.log(avg);
-    console.log(assignmentidsArr);
-    console.log(assignmentidsArr[0].id);
-
-    // const object3 = {...object1, ...object2 }
-    let resultObj = {};
-    resultObj.id = 125 //learner_id
-    resultObj.avg = avg
-
-    // let retObjArr = [];
-    for (i = 0; i < assignmentidsArr.length; i++) {
-        let ob = assignmentidsArr[i];
-        const keys = Object.keys(ob);
-        let retObj = {};
-        let obval = ob.value;
-        resultObj[key] = keys[0];
-        // retObjArr.push(retObj);
+    catch (err) {
+        return err.name;
     }
-
-    return resultObj;
 
 }
 console.log(getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions));
