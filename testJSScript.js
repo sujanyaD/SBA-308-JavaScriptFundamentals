@@ -131,44 +131,7 @@ function getLearnerData(course, ag, submissions) {
             let assignmentidsArr = [];
             let pointspossiblededuction = 0;
 
-            for (itm in filteredSubmissions) {
-                let obj = filteredSubmissions[itm];
-                let score = obj.submission.score;
-                let assignmentid = obj.assignment_id;
-                let submittedat = obj.submission.submitted_at;
-
-                let filteredag = ag.assignments.filter((a) => { if (a.id == assignmentid) { return a } });
-                for (itm in filteredag) {
-                    let objAg = filteredag[itm];
-                    let dueat = objAg.due_at;
-                    let pointspossible = objAg.points_possible;
-                    if(pointspossible === 0)
-                        return "Points possible cannot be 0";
-                    let today = new Date();
-                    //
-                    if (today.toISOString().split('T')[0] >= dueat) {
-
-                        pointspossArr.push(pointspossible);
-                        let newObj = {}
-                        newObj.id = assignmentid;
-
-                        let weighteavgscore = 0;
-                        if (submittedat > dueat) {
-                            pointspossiblededuction = (pointspossible * 10) / 100;
-                            weighteavgscore = (score - pointspossiblededuction) / pointspossible;
-                            scoresArr.push(score - pointspossiblededuction);
                         }
-                        else {
-                            weighteavgscore = score / pointspossible;
-                            scoresArr.push(score);
-                        }
-                        newObj.value = parseFloat(weighteavgscore.toFixed(3));
-                        assignmentidsArr.push(newObj);
-                    }
-
-                }
-
-            }
             const sumpointspossArr = pointspossArr.reduce((a, b) => a + b, 0);
             const scoresArrsum = scoresArr.reduce((a, b) => a + b, 0);
 
